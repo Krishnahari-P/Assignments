@@ -1,0 +1,8 @@
+package my_java_project;
+class EmployeeManagerApp {
+	public static void  main(String[] args){	
+		String filePath="C:\\Users\\Krish\\Downloads\\employees.csv";
+		EmployeeManagerController obj=new EmployeeManagerController();
+		obj.writeDataToDb(filePath);
+	}
+}
