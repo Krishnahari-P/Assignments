@@ -1,5 +1,6 @@
 package com.litmus7.employeeManager;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -22,7 +23,11 @@ public class EmployeeManagerController {
 	
 	public List<String[]> readCSV(String filePath){
 		List<String[]> records=new ArrayList<>();
-		
+		File file = new File(filePath);
+		if (!file.exists() || !file.canRead()) {
+	        System.out.println("CSV file not found or is not readable.");
+	        return records;
+	    }
 		try(BufferedReader br=new BufferedReader(new FileReader(filePath))){
 			br.readLine();
 			String nextLine;
