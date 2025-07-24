@@ -1,9 +1,5 @@
 package com.litmus7.employeeManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,15 +9,8 @@ public class Validator {
 		return row.length==8;
 	}
 	
-	public static boolean employeeExists(Connection con,int empId) throws SQLException {
-		String query="select employee_id from employee where employee_id=?";
-		try(PreparedStatement p=con.prepareStatement(query)){
-			p.setInt(1, empId);
-			try(ResultSet rs=p.executeQuery()){
-				return rs.next();
-			}
-		}
-		
+	public static boolean validEmployeeId(int employeeId) {
+		return employeeId>0;
 	}
 	
 	public static boolean validateName(String name) {
@@ -37,15 +26,13 @@ public class Validator {
 	}
 	
 	public static String validateSalary(String salaryStr) {
-		if (salaryStr == null || salaryStr.trim().isEmpty()) {
-            return null;
-        } 
-		else if (salaryStr.matches("[1-9][0-9]*")) {
-            return salaryStr;
-        } 
+		if (salaryStr != null && salaryStr.matches("[1-9][0-9]*")) {
+		    return salaryStr;
+		}
 		else {
-            return null; // return null if it doesn't match
-        }
+		    return null;
+		}
+
 	}
 	
 	public static LocalDate validateDate(String joinDateStr) {
