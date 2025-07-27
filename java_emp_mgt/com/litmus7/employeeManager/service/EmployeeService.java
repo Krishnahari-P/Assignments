@@ -3,11 +3,12 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import com.litmus7.employeeManager.Validator;
+
 import com.litmus7.employeeManager.dao.EmployeeDao;
 import com.litmus7.employeeManager.model.Employee;
 import com.litmus7.employeeManager.response.Response;
 import com.litmus7.employeeManager.util.CSVUtil;
+import com.litmus7.employeeManager.validator.Validator;
 
 public class EmployeeService {
     private EmployeeDao dao = new EmployeeDao();
