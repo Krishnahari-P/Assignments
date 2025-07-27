@@ -1,4 +1,4 @@
-package com.litmus7.employeeManager;
+package com.litmus7.employeeManager.response;
 
 public class Response {
 	boolean success;
