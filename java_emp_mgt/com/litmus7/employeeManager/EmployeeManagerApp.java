@@ -23,7 +23,7 @@ class EmployeeManagerApp {
 	public static void getEmployeeData(EmployeeManagerController employeeManagerController) {
 		Response response= employeeManagerController.getAllEmployeeNames();
 		if(response.getStatusCode()==200) {
-			System.out.println("Name of existing employees int the database :");
+			System.out.println("Name of existing employees in the database :");
 			System.out.println(response.getMessage());
 		}
 		else {
