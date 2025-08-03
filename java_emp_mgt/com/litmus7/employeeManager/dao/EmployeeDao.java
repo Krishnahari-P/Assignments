@@ -1,24 +1,41 @@
 package com.litmus7.employeeManager.dao;
-import com.litmus7.employeeManager.model.Employee;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-public class EmployeeDao {
-	private static final String URL="jdbc:mysql://localhost:3306/java_db";
-	private static final String USERNAME="root";
-	private static final String PASSWORD="krish@123";
-	
-	public Connection getConnection() throws SQLException{
-		return DriverManager.getConnection(URL,USERNAME,PASSWORD);
+import java.util.Properties;
+
+import com.litmus7.employeeManager.constants.SQLConstants;
+import com.litmus7.employeeManager.model.Employee;
+
+
+public class EmployeeDao {	
+	public Connection getConnection() throws SQLException {
+	    Properties properties = new Properties();
+	    try (FileInputStream fis = new FileInputStream("src\\com\\litmus7\\resources\\db.properties")) {
+	        properties.load(fis);
+	    }
+	    catch (IOException e) {
+	        throw new SQLException("Failed to load database properties", e);
+	    }
+
+	    String URL = properties.getProperty("jdbc.url");
+	    String USERNAME = properties.getProperty("jdbc.username");
+	    String PASSWORD = properties.getProperty("jdbc.password");
+
+	    return DriverManager.getConnection(URL, USERNAME, PASSWORD);
 	}
-	
-	public static boolean employeeExists(Connection con,int empId) throws SQLException {
-		String getEmployeeData="select employee_id from employee where employee_id=?";
+
+	    
+	public boolean employeeExists(Connection con,int empId) throws SQLException {
+		String getEmployeeData=SQLConstants.checkEmployeeExists;
 		try(PreparedStatement p=con.prepareStatement(getEmployeeData)){
 			p.setInt(1, empId);
 			try(ResultSet rs=p.executeQuery()){
@@ -28,12 +45,12 @@ public class EmployeeDao {
 		
 	}
 	
-	public void insertEmployees(Connection con, List<Employee> employeeList) throws SQLException {
-        String insertEmployee = "INSERT INTO employee VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = con.prepareStatement(insertEmployee)) {
+	public void saveDataToDb(Connection connection, List<Employee> employeeList) throws SQLException {
+        String insertEmployee = SQLConstants.insertEmployee;
+        try (PreparedStatement ps = connection.prepareStatement(insertEmployee)) {
         	int batchSize=0;
             for (Employee employee : employeeList) {
-                ps.setInt(1, employee.getId());
+                ps.setInt(1, employee.getEmployeeId());
                 ps.setString(2, employee.getFirstName());
                 ps.setString(3, employee.getLastName());
                 ps.setString(4, employee.getEmail());
@@ -49,5 +66,18 @@ public class EmployeeDao {
             ps.executeBatch();
         }
     }
+	
+	public List<String> fetchEmployeeNames(Connection connection) throws SQLException{
+		List<String> employeeNames=new ArrayList<>();
+		String getEmployeeData=SQLConstants.getEmployeeName;
+		try(PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
+			ResultSet rs=statement.executeQuery();
+			while(rs.next()) {
+				String fullName=rs.getString("first_name")+" "+rs.getString("last_name");
+				employeeNames.add(fullName);
+			}
+		}
+		return employeeNames;
+	}
 	
 }
