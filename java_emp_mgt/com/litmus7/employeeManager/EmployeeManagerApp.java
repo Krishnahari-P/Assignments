@@ -4,7 +4,7 @@ import com.litmus7.employeeManager.response.Response;
 
 class EmployeeManagerApp {
 	public static void  main(String[] args){	
-		String filePath="src\\com\\litmus7\\resources\\employees.csv";
+		String filePath="Assignments\\resources\\employees.csv";
 		EmployeeManagerController employeeManagerController=new EmployeeManagerController();
 		saveDataToDb(employeeManagerController,filePath);
 		getEmployeeData(employeeManagerController);
