@@ -1,74 +1,88 @@
 package com.litmus7.employeeManager.service;
+
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.litmus7.employeeManager.validator.Validator;
 import com.litmus7.employeeManager.dao.EmployeeDao;
 import com.litmus7.employeeManager.model.Employee;
-import com.litmus7.employeeManager.response.Response;
 import com.litmus7.employeeManager.util.CSVUtil;
-import com.litmus7.employeeManager.validator.Validator;
 
 public class EmployeeService {
-    private EmployeeDao dao = new EmployeeDao();
 
-    public Response processCSVAndSave(String filePath) {
-        List<String[]> employeeRecords = CSVUtil.readCSV(filePath);
+    private final EmployeeDao employeeDao = new EmployeeDao();
+
+    public List<Employee> processCSVAndSaveData(String filePath) throws SQLException {
+        List<String[]> records = CSVUtil.readCSV(filePath);
         List<Employee> validEmployees = new ArrayList<>();
 
-        if (employeeRecords.isEmpty()) {
-            return new Response(false, "CSV file is empty or unreadable.");
+        if (records.isEmpty()) {
+        	return validEmployees;
         }
 
-        try (Connection connection = dao.getConnection()) {
+        try (Connection connection = employeeDao.getConnection()) {
             connection.setAutoCommit(false);
-        
-            for (String[] record : employeeRecords) {
-                if (!Validator.isValidRow(record)) {
-                	continue;
+
+            for (String[] record : records) {
+                try {
+                    Employee employee = mapToEmployee(record);
+                    if (employee == null || !Validator.isValidEmployee(employee)) {
+                    	continue;
+                    }
+
+                    if (employeeDao.employeeExists(connection, employee.getEmployeeId())) {
+                    	
+                    	continue;
+                    }
+
+                    validEmployees.add(employee);
                 }
-
-                int empId = Integer.parseInt(record[0].trim());
-                if (EmployeeDao.employeeExists(connection,empId)) {
-                	continue;
+                catch (Exception e) {
+                    continue;
                 }
-
-                String firstName = record[1].trim();
-                String lastName = record[2].trim();
-                String email = record[3].trim();
-                String phoneNumber = record[4].trim();
-                String department = record[5].trim();
-                String salaryStr = record[6].trim();
-                String joinDateStr = record[7].trim();
-
-                if (!Validator.validateName(firstName) || !Validator.validateName(lastName)
-                    || !Validator.validateEmail(email) || !Validator.validatePhoneNumber(phoneNumber)
-                    || !Validator.validateName(department)) {
-                	continue;
-                }
-
-                String validSalary = Validator.validateSalary(salaryStr);
-                if (validSalary == null) {
-                	continue;
-                }
-
-                LocalDate joinDate = Validator.validateDate(joinDateStr);
-                if (joinDate == null) {
-                	continue;
-                }
-
-                Employee emp = new Employee(empId, firstName, lastName, email, phoneNumber, department, Integer.parseInt(validSalary), joinDate);
-                validEmployees.add(emp);
             }
 
-            dao.insertEmployees(connection, validEmployees);
+            employeeDao.saveDataToDb(connection, validEmployees);
             connection.commit();
-            return new Response(true, validEmployees.size() + " employees inserted successfully.");
-        } 
+        }
+
+        return validEmployees;
+    }
+
+    private Employee mapToEmployee(String[] record) {
+        if (record.length != 8) {
+        	return null;
+        }
+
+        try {
+            int employeeId = Integer.parseInt(record[0].trim());
+            String firstName = record[1].trim();
+            String lastName = record[2].trim();
+            String email = record[3].trim();
+            String phoneNo = record[4].trim();
+            String department = record[5].trim();
+            int salary = Integer.parseInt(record[6].trim());
+            LocalDate joinDate = Validator.validateDate(record[7].trim());
+
+            if (joinDate == null) {
+            	return null;
+            }
+
+            return new Employee(employeeId, firstName, lastName, email, phoneNo, department, salary, joinDate);
+        }
         catch (Exception e) {
-            return new Response(false, "Error occurred: " + e.getMessage());
+        	e.printStackTrace();
+            return null;
         }
     }
-}
+    
+    public List<String> getEmployeeNames() throws SQLException {
+        try (Connection connection = employeeDao.getConnection()) {
+            return employeeDao.fetchEmployeeNames(connection);
+        }
+    }
 
+}
