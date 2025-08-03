@@ -19,7 +19,7 @@ import com.litmus7.employeeManager.model.Employee;
 public class EmployeeDao {	
 	public Connection getConnection() throws SQLException {
 	    Properties properties = new Properties();
-	    try (FileInputStream fis = new FileInputStream("src\\com\\litmus7\\resources\\db.properties")) {
+	    try (FileInputStream fis = new FileInputStream("Assignments\\resources\\db.properties")) {
 	        properties.load(fis);
 	    }
 	    catch (IOException e) {
