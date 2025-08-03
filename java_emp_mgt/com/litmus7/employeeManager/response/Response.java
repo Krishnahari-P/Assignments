@@ -1,15 +1,15 @@
 package com.litmus7.employeeManager.response;
 
 public class Response {
-	boolean success;
+	int statusCode;
 	String message;
-	public Response(boolean success,String message) {
-		this.success=success;
+	public Response(int statusCode,String message) {
+		this.statusCode=statusCode;
 		this.message=message;
 	}
 	
-	public boolean isSuccess() {
-		return success;
+	public int getStatusCode() {
+		return statusCode;
 	}
 	
 	public String getMessage() {
