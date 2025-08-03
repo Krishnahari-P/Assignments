@@ -4,10 +4,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import com.litmus7.employeeManager.model.Employee;
+
 public class Validator {
-	public static boolean isValidRow(String[] row) {
-		return row.length==8;
-	}
 	
 	public static boolean validEmployeeId(int employeeId) {
 		return employeeId>0;
@@ -25,15 +24,6 @@ public class Validator {
 		return phoneNo.matches("^(\\+91|91)?[6-9]\\d{9}$");
 	}
 	
-	public static String validateSalary(String salaryStr) {
-		if (salaryStr != null && salaryStr.matches("[1-9][0-9]*")) {
-		    return salaryStr;
-		}
-		else {
-		    return null;
-		}
-
-	}
 	
 	public static LocalDate validateDate(String joinDateStr) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -46,4 +36,16 @@ public class Validator {
 		}
 		return ld;
 	}
+	
+	public static boolean isValidEmployee(Employee emp) {
+        return emp != null &&
+               validEmployeeId(emp.getEmployeeId()) &&
+               validateName(emp.getFirstName()) &&
+               validateName(emp.getLastName()) &&
+               validateEmail(emp.getEmail()) &&
+               validatePhoneNumber(emp.getPhoneNumber()) &&
+               validateName(emp.getDepartment()) &&
+               emp.getSalary() > 0 &&
+               emp.getJoinDate() != null;
+    }
 }
