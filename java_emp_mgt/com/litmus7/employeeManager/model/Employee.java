@@ -24,7 +24,7 @@ public class Employee {
         this.joinDate = joinDate;
     }
     
-    public int getId() {
+    public int getEmployeeId() {
     	return employeeId;
     }
     
