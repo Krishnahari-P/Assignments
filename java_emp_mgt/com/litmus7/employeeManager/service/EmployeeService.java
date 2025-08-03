@@ -9,24 +9,22 @@ import java.util.List;
 import com.litmus7.employeeManager.validator.Validator;
 import com.litmus7.employeeManager.dao.EmployeeDao;
 import com.litmus7.employeeManager.model.Employee;
-import com.litmus7.employeeManager.util.CSVUtil;
 
 public class EmployeeService {
 
     private final EmployeeDao employeeDao = new EmployeeDao();
 
-    public List<Employee> processCSVAndSaveData(String filePath) throws SQLException {
-        List<String[]> records = CSVUtil.readCSV(filePath);
+    public List<Employee> processCSVAndSaveData(List<String[]> employeeRecords) throws SQLException {
         List<Employee> validEmployees = new ArrayList<>();
 
-        if (records.isEmpty()) {
+        if (employeeRecords.isEmpty()) {
         	return validEmployees;
         }
 
         try (Connection connection = employeeDao.getConnection()) {
             connection.setAutoCommit(false);
 
-            for (String[] record : records) {
+            for (String[] record : employeeRecords) {
                 try {
                     Employee employee = mapToEmployee(record);
                     if (employee == null || !Validator.isValidEmployee(employee)) {
