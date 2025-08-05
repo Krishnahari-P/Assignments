@@ -1,20 +1,16 @@
 package com.litmus7.employeeManager.util;
+
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
+
 public class CSVUtil {
-    public static List<String[]> readCSV(String filePath) {
+    public static List<String[]> readCSV(String filePath) throws EmployeeManagerException {
         List<String[]> records = new ArrayList<>();
-        File file = new File(filePath);
-        
-        if (!file.exists() || !file.canRead() || !file.getName().toLowerCase().endsWith(".csv")){
-        	return records;
-        }
-        
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             br.readLine(); 
             String nextLine;
@@ -22,14 +18,10 @@ public class CSVUtil {
                 records.add(nextLine.split(","));
             }
         } 
-        catch (IOException ioe) {
-        	System.out.println("Error reading CSV file "+ioe);
-            ioe.printStackTrace();
-        }
+        catch (IOException e) {
+        	throw new EmployeeManagerException("File not found");
+		} 
         return records;
     }
 }
 
- {
-    
-}
