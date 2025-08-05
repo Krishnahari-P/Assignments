@@ -86,7 +86,7 @@ public class EmployeeService {
             return employeeDao.fetchEmployeeNames(connection);
         }
         catch( SQLException e) {
-        	throw new EmployeeManagerException("Database error");
+        	throw new EmployeeManagerException("Couldn't connect to db");
         }
     }
 
