@@ -8,13 +8,14 @@ import java.util.List;
 
 import com.litmus7.employeeManager.validator.Validator;
 import com.litmus7.employeeManager.dao.EmployeeDao;
+import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 import com.litmus7.employeeManager.model.Employee;
 
 public class EmployeeService {
 
     private final EmployeeDao employeeDao = new EmployeeDao();
 
-    public List<Employee> processCSVAndSaveData(List<String[]> employeeRecords) throws SQLException {
+    public List<Employee> processCSVAndSaveData(List<String[]> employeeRecords) throws EmployeeManagerException {
         List<Employee> validEmployees = new ArrayList<>();
 
         if (employeeRecords.isEmpty()) {
@@ -45,7 +46,10 @@ public class EmployeeService {
 
             employeeDao.saveDataToDb(connection, validEmployees);
             connection.commit();
-        }
+        } 
+        catch (SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		} 
 
         return validEmployees;
     }
@@ -77,9 +81,12 @@ public class EmployeeService {
         }
     }
     
-    public List<String> getEmployeeNames() throws SQLException {
+    public List<String> getEmployeeNames() throws EmployeeManagerException {
         try (Connection connection = employeeDao.getConnection()) {
             return employeeDao.fetchEmployeeNames(connection);
+        }
+        catch( SQLException e) {
+        	throw new EmployeeManagerException("Database error");
         }
     }
 
