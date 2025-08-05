@@ -13,28 +13,34 @@ import java.util.List;
 import java.util.Properties;
 
 import com.litmus7.employeeManager.constants.SQLConstants;
+import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 import com.litmus7.employeeManager.model.Employee;
 
 
 public class EmployeeDao {	
-	public Connection getConnection() throws SQLException {
+	public Connection getConnection() throws EmployeeManagerException {
 	    Properties properties = new Properties();
-	    try (FileInputStream fis = new FileInputStream("Assignments\\resources\\db.properties")) {
+	    try (FileInputStream fis = new FileInputStream("src\\com\\litmus7\\resources\\db.properties")) {
 	        properties.load(fis);
 	    }
 	    catch (IOException e) {
-	        throw new SQLException("Failed to load database properties", e);
+	        throw new EmployeeManagerException("Failed to load database properties", e);
 	    }
 
 	    String URL = properties.getProperty("jdbc.url");
 	    String USERNAME = properties.getProperty("jdbc.username");
 	    String PASSWORD = properties.getProperty("jdbc.password");
 
-	    return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+	    try {
+			return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+		} 
+	    catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		}
 	}
 
 	    
-	public boolean employeeExists(Connection con,int empId) throws SQLException {
+	public boolean employeeExists(Connection con,int empId) throws EmployeeManagerException {
 		String getEmployeeData=SQLConstants.checkEmployeeExists;
 		try(PreparedStatement p=con.prepareStatement(getEmployeeData)){
 			p.setInt(1, empId);
@@ -42,10 +48,13 @@ public class EmployeeDao {
 				return rs.next();
 			}
 		}
+		catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		}
 		
 	}
 	
-	public void saveDataToDb(Connection connection, List<Employee> employeeList) throws SQLException {
+	public void saveDataToDb(Connection connection, List<Employee> employeeList) throws EmployeeManagerException {
         String insertEmployee = SQLConstants.insertEmployee;
         try (PreparedStatement ps = connection.prepareStatement(insertEmployee)) {
         	int batchSize=0;
@@ -65,9 +74,12 @@ public class EmployeeDao {
             }
             ps.executeBatch();
         }
+        catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		}
     }
 	
-	public List<String> fetchEmployeeNames(Connection connection) throws SQLException{
+	public List<String> fetchEmployeeNames(Connection connection) throws EmployeeManagerException{
 		List<String> employeeNames=new ArrayList<>();
 		String getEmployeeData=SQLConstants.getEmployeeName;
 		try(PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
@@ -76,6 +88,9 @@ public class EmployeeDao {
 				String fullName=rs.getString("first_name")+" "+rs.getString("last_name");
 				employeeNames.add(fullName);
 			}
+		}
+		catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
 		}
 		return employeeNames;
 	}
