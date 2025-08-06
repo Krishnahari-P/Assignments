@@ -67,11 +67,8 @@ public class EmployeeService {
             String phoneNo = record[4].trim();
             String department = record[5].trim();
             int salary = Integer.parseInt(record[6].trim());
-            LocalDate joinDate = Validator.validateDate(record[7].trim());
+            String joinDate=record[7].trim();
 
-            if (joinDate == null) {
-            	return null;
-            }
 
             return new Employee(employeeId, firstName, lastName, email, phoneNo, department, salary, joinDate);
         }
