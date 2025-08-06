@@ -1,6 +1,8 @@
 package com.litmus7.employeeManager.model;
 
 import java.time.LocalDate;
+
+import com.litmus7.employeeManager.validator.Validator;
 public class Employee {
     private int employeeId;
     private String firstName;
@@ -13,7 +15,7 @@ public class Employee {
 
 
     public Employee(int employeeId, String firstName, String lastName, String email, 
-                    String phoneNumber, String department, int salary, LocalDate joinDate) {
+                    String phoneNumber, String department, int salary, String joinDate) {
         this.employeeId = employeeId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -21,7 +23,7 @@ public class Employee {
         this.phoneNumber = phoneNumber;
         this.department = department;
         this.salary = salary;
-        this.joinDate = joinDate;
+        this.joinDate = Validator.validateDate(joinDate);
     }
     
     public int getEmployeeId() {
