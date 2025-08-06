@@ -56,4 +56,59 @@ public class EmployeeManagerController {
         	return new Response(500, "Database error: " + e.getMessage());
 		}
     }
+    
+    public Response getEmployeesById(List<Integer> employeeId) {
+    	if(employeeId.isEmpty()) {
+    		return new Response(204, "Provided list is empty");
+    	}
+    	try {
+    		List<String> employeeDetails=employeeService.getEmployeesById(employeeId);
+//    		if (employeeDetails.isEmpty()) {
+//                return new Response(204, "List is empty");
+//            }
+    		return new Response(200,String.join("\n", employeeDetails));
+    	}
+    	catch(EmployeeManagerException e) {
+    		return new Response(500, "Error: " + e.getMessage());
+    	}
+    }
+
+	public Response deleteEmployeeById(int employeeId) {
+		try {
+			boolean employeeDeleted=employeeService.deleteEmployeeById(employeeId);
+			if(!employeeDeleted) {
+				return new Response(204,"Deletion failed");
+			}
+			return new Response(200, "Employee deleted for the given ID: "+employeeId);
+		}
+		catch(EmployeeManagerException e) {
+			return new Response(500, "Error: " + e.getMessage());
+		}
+	}
+
+	public Response addEmployee(Employee employee) {
+		try {
+			boolean employeeAdded=employeeService.addEmployee(employee);
+			if(!employeeAdded) {
+				return new Response(204,"Insertion failed");
+			}
+			return new Response(200,"Employee inserted successfully");
+		}
+		catch(EmployeeManagerException e) {
+			return new Response(500, "Error: " + e.getMessage());
+		}
+	}
+
+	public Response updateEmployee(Employee employee) {
+		try {
+			boolean employeeUpdated=employeeService.updateEmployee(employee);
+			if(!employeeUpdated) {
+				return new Response(204, "Updation failed");
+			}
+			return new Response(200,"Employee details updated");
+		}
+		catch(EmployeeManagerException e) {
+			return new Response(500, "Error: " + e.getMessage());
+		}
+	}
 }
