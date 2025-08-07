@@ -156,4 +156,36 @@ public class EmployeeService {
 		}
 	}
 
+	public int addEmployeesInBatch(List<Employee> employeeList) throws EmployeeManagerException {
+		List<Employee> validEmployees=new ArrayList<>();
+		try(Connection connection=employeeDao.getConnection()){
+			for(Employee employee:employeeList) {
+				if(!Validator.isValidEmployee(employee)) {
+					continue;
+				}
+				if(employeeDao.employeeExists(connection, employee.getEmployeeId())) {
+					continue;
+				}
+				validEmployees.add(employee);
+			}
+			return employeeDao.addEmployeesInBatch(connection,validEmployees);
+		}
+		catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		}
+	}
+	
+	public boolean transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) throws EmployeeManagerException {
+        if (employeeIds.isEmpty() || newDepartment == null) {
+            throw new EmployeeManagerException("Employee IDs or Department name is invalid.");
+        }
+        try(Connection connection=employeeDao.getConnection()){
+			return employeeDao.transferEmployeesToDepartment(connection,employeeIds, newDepartment);
+		}
+		catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		}
+        
+    }
+
 }
