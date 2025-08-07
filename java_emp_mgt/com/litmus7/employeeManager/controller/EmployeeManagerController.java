@@ -111,4 +111,34 @@ public class EmployeeManagerController {
 			return new Response(500, "Error: " + e.getMessage());
 		}
 	}
+
+	public Response addEmployeesInBatch(List<Employee> employeeList) {
+		try {
+			int totalRecords=employeeList.size();
+			int employeesAdded=employeeService.addEmployeesInBatch(employeeList);
+			if(totalRecords==0) {
+				return new Response(400,"Provided list is empty");
+			}
+			if(employeesAdded!=totalRecords) {
+				return new Response(202,"Inserted " + employeesAdded + " out of " + totalRecords + " employees.");
+			}
+			
+			return new Response(200,"All employees added successfully.");
+		}
+		catch(EmployeeManagerException e) {
+			return new Response(500, "Error: " + e.getMessage());
+		}
+	}
+	public Response transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) {
+        try {
+            boolean transferedEmployees=employeeService.transferEmployeesToDepartment(employeeIds, newDepartment);
+            if(!transferedEmployees) {
+            	return new Response(204,"Department update failed");
+            }
+            return new Response(200, "All employees transferred successfully to " + newDepartment);
+        } 
+        catch (EmployeeManagerException e) {
+            return new Response(500, "Transfer failed: " + e.getMessage());
+        }
+    }
 }
