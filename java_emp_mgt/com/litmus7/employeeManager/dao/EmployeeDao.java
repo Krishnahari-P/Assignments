@@ -1,5 +1,7 @@
 package com.litmus7.employeeManager.dao;
 
+
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -8,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -173,6 +176,75 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			throw new EmployeeManagerException("Couldn't connect to db");
+		}
+	}
+
+
+	public int addEmployeesInBatch(Connection connection, List<Employee> employeeList) throws EmployeeManagerException {
+		String insertEmployee = SQLConstants.insertEmployee;
+		int employeesInserted=0;
+		try (PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
+            for (Employee employee : employeeList) {
+                statement.setInt(1, employee.getEmployeeId());
+                statement.setString(2, employee.getFirstName());
+                statement.setString(3, employee.getLastName());
+                statement.setString(4, employee.getEmail());
+                statement.setString(5, employee.getPhoneNumber());
+                statement.setString(6, employee.getDepartment());
+                statement.setInt(7, employee.getSalary());
+                statement.setDate(8, Date.valueOf(employee.getJoinDate()));
+                statement.addBatch();
+                
+            }
+            int[] results=statement.executeBatch();
+            for(int i=0;i<results.length;i++) {
+            	if(results[i]==Statement.EXECUTE_FAILED) {
+            		System.err.println("Insert failed for Employee ID: "+employeeList.get(i).getEmployeeId());
+            	}
+            	else {
+            		employeesInserted++;
+            	}
+            }
+            return employeesInserted;
+        }
+        catch(SQLException e) {
+			throw new EmployeeManagerException("Couldn't connect to db");
+		}
+	}
+	
+	public boolean transferEmployeesToDepartment(Connection connection,List<Integer> employeeIds,String department) throws EmployeeManagerException {
+		String updateEmployeeDepartment=SQLConstants.updateEmployeeDepartment;
+		try(PreparedStatement statement=connection.prepareStatement(updateEmployeeDepartment)){
+			connection.setAutoCommit(false);
+			for(int employeeId:employeeIds) {
+				statement.setString(1,department);
+				statement.setInt(2, employeeId);
+				int updates=statement.executeUpdate();
+				if(updates==0) {
+					connection.rollback();
+					throw new EmployeeManagerException("Couldn't update due to invalid employee data");
+				}
+			}
+			
+			connection.commit();
+			return true;
+		}
+		catch(SQLException e) {
+			try {
+				connection.rollback();
+			}
+			catch(SQLException se) {
+				throw new EmployeeManagerException("Roll back failed!");
+			}
+			throw new EmployeeManagerException("Error in sql operation ",e);
+		}
+		finally {
+			try {
+				connection.setAutoCommit(true);
+			}
+			catch (SQLException e) {
+	            throw new EmployeeManagerException("Failed to reset auto-commit", e);
+	        }
 		}
 	}
 	
