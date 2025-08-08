@@ -53,7 +53,7 @@ public class EmployeeManagerController {
             return new Response(200, String.join("\n", employeeNames));
         }  
         catch (EmployeeManagerException e) {
-        	return new Response(500, "Database error: " + e.getMessage());
+        	return new Response(500, "Error: " + e.getMessage());
 		}
     }
     
@@ -138,7 +138,7 @@ public class EmployeeManagerController {
             return new Response(200, "All employees transferred successfully to " + newDepartment);
         } 
         catch (EmployeeManagerException e) {
-            return new Response(500, "Transfer failed: " + e.getMessage());
+            return new Response(500, e.getMessage());
         }
     }
 }
