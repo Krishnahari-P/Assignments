@@ -15,7 +15,7 @@ public class Employee {
 
 
     public Employee(int employeeId, String firstName, String lastName, String email, 
-                    String phoneNumber, String department, int salary, String joinDate) {
+                    String phoneNumber, String department, int salary, String joinDateStr) {
         this.employeeId = employeeId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -23,7 +23,7 @@ public class Employee {
         this.phoneNumber = phoneNumber;
         this.department = department;
         this.salary = salary;
-        this.joinDate = Validator.validateDate(joinDate);
+        this.joinDate = Validator.validateDate(joinDateStr);
     }
     
     public int getEmployeeId() {
