@@ -31,7 +31,7 @@ public class EmployeeService {
                     	continue;
                     }
 
-                    if (employeeDao.employeeExists(connection, employee.getEmployeeId())) {
+                    if (employeeDao.employeeExists(employee.getEmployeeId())) {
                     	
                     	continue;
                     }
@@ -43,11 +43,11 @@ public class EmployeeService {
                 }
             }
 
-            employeeDao.saveDataToDb(connection, validEmployees);
+            employeeDao.saveDataToDb(validEmployees);
             connection.commit();
         } 
         catch (SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		} 
 
         return validEmployees;
@@ -66,12 +66,7 @@ public class EmployeeService {
             String phoneNo = record[4].trim();
             String department = record[5].trim();
             int salary = Integer.parseInt(record[6].trim());
-//            LocalDate joinDate = Validator.validateDate(record[7].trim());
             String joinDate=record[7].trim();
-
-//            if (joinDate == null) {
-//            	return null;
-//            }
 
             return new Employee(employeeId, firstName, lastName, email, phoneNo, department, salary, joinDate);
         }
@@ -82,19 +77,19 @@ public class EmployeeService {
     }
     
     public List<String> getEmployeeNames() throws EmployeeManagerException {
-        try (Connection connection = employeeDao.getConnection()) {
-            return employeeDao.fetchEmployeeNames(connection);
+        try {
+            return employeeDao.fetchEmployeeNames();
         }
-        catch( SQLException e) {
-        	throw new EmployeeManagerException("Couldn't connect to db");
+        catch( Exception e) {
+        	throw new EmployeeManagerException("Fetching employee names failed: "+e.getMessage(),e);
         }
     }
 
     public List<String> getEmployeesById(List<Integer> employeeIdList) throws EmployeeManagerException {
-        try (Connection connection = employeeDao.getConnection()) {
+        try  {
             List<Integer> validEmployeeIds = new ArrayList<>();
             for (int employeeId : employeeIdList) {
-                if (employeeDao.employeeExists(connection, employeeId)) {
+                if (employeeDao.employeeExists(employeeId)) {
                     validEmployeeIds.add(employeeId);
                 }
             }
@@ -103,75 +98,75 @@ public class EmployeeService {
                 throw new EmployeeManagerException("No valid employee ID's found.");
             }
 
-            return employeeDao.fetchEmployeesById(connection, validEmployeeIds);
+            return employeeDao.fetchEmployeesById(validEmployeeIds);
         }
-        catch (SQLException e) {
-            throw new EmployeeManagerException("Couldn't connect to db");
+        catch (Exception e) {
+            throw new EmployeeManagerException("Fetching employee details failed: "+e.getMessage(),e);
         }
     }
 
 
 	public boolean deleteEmployeeById(int employeeId) throws EmployeeManagerException {
-		try(Connection connection = employeeDao.getConnection()){
-			if (!employeeDao.employeeExists(connection, employeeId)) {
+		try{
+			if (!employeeDao.employeeExists(employeeId)) {
                 throw new EmployeeManagerException("Employee doesn't exists for the given ID "+employeeId);
             }
-			return employeeDao.deleteEmployeeById(connection,employeeId);
+			return employeeDao.deleteEmployeeById(employeeId);
 		}
-		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+		catch(Exception e) {
+			throw new EmployeeManagerException("Deletion falied: "+e.getMessage(),e);
 		}
 	}
 
 	public boolean addEmployee(Employee employee) throws EmployeeManagerException {
 		
-		try(Connection connection = employeeDao.getConnection()){
-			if (employeeDao.employeeExists(connection, employee.getEmployeeId())) {
+		try{
+			if (employeeDao.employeeExists(employee.getEmployeeId())) {
 				throw new EmployeeManagerException("Employee already exists with given employee Id");
             }
 			if (employee == null || !Validator.isValidEmployee(employee)) {
             	throw new EmployeeManagerException("Invalid employee details");
             }
-			return employeeDao.addEmployee(connection,employee);
+			return employeeDao.addEmployee(employee);
 		}
-		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+		catch(Exception e) {
+			throw new EmployeeManagerException("Employee addition failed: "+e.getMessage(),e);
 		}
 		
 	}
 
 	public boolean updateEmployee(Employee employee) throws EmployeeManagerException {
-		try(Connection connection=employeeDao.getConnection()){
+		try{
 			if (employee == null || !Validator.isValidEmployee(employee)) {
             	throw new EmployeeManagerException("Invalid employee details");
             }
-			if(!employeeDao.employeeExists(connection, employee.getEmployeeId())) {
+			if(!employeeDao.employeeExists(employee.getEmployeeId())) {
 				throw new EmployeeManagerException("Employee doesn't exists for the given ID "+employee.getEmployeeId());
 			}
 			
-			return employeeDao.updateEmployee(connection,employee);
+			return employeeDao.updateEmployee(employee);
 		}
-		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+		catch(Exception e) {
+			throw new EmployeeManagerException("Update employee failed: "+e.getMessage(),e);
 		}
 	}
 
 	public int addEmployeesInBatch(List<Employee> employeeList) throws EmployeeManagerException {
 		List<Employee> validEmployees=new ArrayList<>();
-		try(Connection connection=employeeDao.getConnection()){
+		try{
 			for(Employee employee:employeeList) {
 				if(!Validator.isValidEmployee(employee)) {
 					continue;
 				}
-				if(employeeDao.employeeExists(connection, employee.getEmployeeId())) {
+				if(employeeDao.employeeExists(employee.getEmployeeId())) {
 					continue;
 				}
 				validEmployees.add(employee);
 			}
-			return employeeDao.addEmployeesInBatch(connection,validEmployees);
+			return employeeDao.addEmployeesInBatch(validEmployees);
 		}
-		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+		catch(Exception e) {
+			throw new EmployeeManagerException("Batch addition failed: "+e.getMessage(),e);
 		}
 	}
 	
@@ -179,11 +174,11 @@ public class EmployeeService {
         if (employeeIds.isEmpty() || newDepartment == null) {
             throw new EmployeeManagerException("Employee IDs or Department name is invalid.");
         }
-        try(Connection connection=employeeDao.getConnection()){
-			return employeeDao.transferEmployeesToDepartment(connection,employeeIds, newDepartment);
+        try{
+			return employeeDao.transferEmployeesToDepartment(employeeIds, newDepartment);
 		}
-		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+		catch(Exception e) {
+			throw new EmployeeManagerException("Employee transfer failed: "+e.getMessage(),e);
 		}
         
     }
