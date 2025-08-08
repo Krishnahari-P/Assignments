@@ -43,7 +43,7 @@ class EmployeeManagerApp {
             System.out.println("Success: " + response.getMessage());
         } 
 		else {
-            System.out.println("Failure: "+response.getStatusCode() +" "+ response.getMessage());
+            System.out.println("Failure: "+response.getStatusCode() +": "+ response.getMessage());
         }
 	}
 	
