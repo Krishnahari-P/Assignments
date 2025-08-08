@@ -27,7 +27,7 @@ public class EmployeeDao {
 	        properties.load(fis);
 	    }
 	    catch (IOException e) {
-	        throw new EmployeeManagerException("Failed to load database properties", e);
+	        throw new EmployeeManagerException("Failed to load database properties: "+e.getMessage(), e);
 	    }
 
 	    String URL = properties.getProperty("jdbc.url");
@@ -38,28 +38,28 @@ public class EmployeeDao {
 			return DriverManager.getConnection(URL, USERNAME, PASSWORD);
 		} 
 	    catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 	}
 
 	    
-	public boolean employeeExists(Connection con,int empId) throws EmployeeManagerException {
+	public boolean employeeExists(int empId) throws EmployeeManagerException {
 		String getEmployeeData=SQLConstants.checkEmployeeExists;
-		try(PreparedStatement statement=con.prepareStatement(getEmployeeData)){
+		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
 			statement.setInt(1, empId);
 			try(ResultSet rs=statement.executeQuery()){
 				return rs.next();
 			}
 		}
 		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 		
 	}
 	
-	public void saveDataToDb(Connection connection, List<Employee> employeeList) throws EmployeeManagerException {
+	public void saveDataToDb(List<Employee> employeeList) throws EmployeeManagerException {
         String insertEmployee = SQLConstants.insertEmployee;
-        try (PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
+        try (Connection connection=getConnection();PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
         	int batchSize=0;
             for (Employee employee : employeeList) {
                 statement.setInt(1, employee.getEmployeeId());
@@ -78,14 +78,14 @@ public class EmployeeDao {
             statement.executeBatch();
         }
         catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
     }
 	
-	public List<String> fetchEmployeeNames(Connection connection) throws EmployeeManagerException{
+	public List<String> fetchEmployeeNames() throws EmployeeManagerException{
 		List<String> employeeNames=new ArrayList<>();
 		String getEmployeeData=SQLConstants.getEmployeeName;
-		try(PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
+		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
 			ResultSet resultSet=statement.executeQuery();
 			while(resultSet.next()) {
 				String fullName=resultSet.getString("first_name")+" "+resultSet.getString("last_name");
@@ -93,16 +93,16 @@ public class EmployeeDao {
 			}
 		}
 		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 		return employeeNames;
 	}
 
 
-	public List<String> fetchEmployeesById(Connection connection,List<Integer> employeeIdList) throws EmployeeManagerException {
+	public List<String> fetchEmployeesById(List<Integer> employeeIdList) throws EmployeeManagerException {
 		List<String> employeeDetails=new ArrayList<>();
 		String getEmployeeById=SQLConstants.getEmployeeById;
-		try(PreparedStatement statement=connection.prepareStatement(getEmployeeById)){
+		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeById)){
 			for(int employeeId:employeeIdList) {
 				statement.setInt(1, employeeId);
 				ResultSet resultSet=statement.executeQuery();
@@ -121,28 +121,28 @@ public class EmployeeDao {
 			}
 		}
 		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 		return employeeDetails;
 	}
 
 
-	public boolean deleteEmployeeById(Connection connection, int employeeId) throws EmployeeManagerException {
+	public boolean deleteEmployeeById(int employeeId) throws EmployeeManagerException {
 		String deleteEmployeeById=SQLConstants.deleteEmployeeById;
-		try(PreparedStatement statement=connection.prepareStatement(deleteEmployeeById)){
+		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(deleteEmployeeById)){
 			statement.setInt(1, employeeId);
 			int rowsAffected = statement.executeUpdate();
 			return rowsAffected > 0;
 		}
 		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 	}
 
 
-	public boolean addEmployee(Connection connection,Employee employee) throws EmployeeManagerException {
+	public boolean addEmployee(Employee employee) throws EmployeeManagerException {
 		String insertEmployee=SQLConstants.insertEmployee;
-		try(PreparedStatement statement=connection.prepareStatement(insertEmployee)){
+		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(insertEmployee)){
 			statement.setInt(1, employee.getEmployeeId());
             statement.setString(2, employee.getFirstName());
             statement.setString(3, employee.getLastName());
@@ -155,14 +155,14 @@ public class EmployeeDao {
             return rowsAffected>0;
 		}
 		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 	}
 
 
-	public boolean updateEmployee(Connection connection,Employee employee) throws EmployeeManagerException {
+	public boolean updateEmployee(Employee employee) throws EmployeeManagerException {
 		String updateEmployee=SQLConstants.updateEmployee;
-		try(PreparedStatement statement=connection.prepareStatement(updateEmployee)){
+		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(updateEmployee)){
             statement.setString(1, employee.getFirstName());
             statement.setString(2, employee.getLastName());
             statement.setString(3, employee.getEmail());
@@ -175,15 +175,15 @@ public class EmployeeDao {
             return rowsAffected>0;
 		}
 		catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 	}
 
 
-	public int addEmployeesInBatch(Connection connection, List<Employee> employeeList) throws EmployeeManagerException {
+	public int addEmployeesInBatch(List<Employee> employeeList) throws EmployeeManagerException {
 		String insertEmployee = SQLConstants.insertEmployee;
 		int employeesInserted=0;
-		try (PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
+		try (Connection connection=getConnection();PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
             for (Employee employee : employeeList) {
                 statement.setInt(1, employee.getEmployeeId());
                 statement.setString(2, employee.getFirstName());
@@ -208,14 +208,18 @@ public class EmployeeDao {
             return employeesInserted;
         }
         catch(SQLException e) {
-			throw new EmployeeManagerException("Couldn't connect to db");
+			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
 		}
 	}
 	
-	public boolean transferEmployeesToDepartment(Connection connection,List<Integer> employeeIds,String department) throws EmployeeManagerException {
+	public boolean transferEmployeesToDepartment(List<Integer> employeeIds,String department) throws EmployeeManagerException {
 		String updateEmployeeDepartment=SQLConstants.updateEmployeeDepartment;
-		try(PreparedStatement statement=connection.prepareStatement(updateEmployeeDepartment)){
+		Connection connection=null;
+		PreparedStatement statement=null;
+		try{
+			connection=getConnection();
 			connection.setAutoCommit(false);
+			statement=connection.prepareStatement(updateEmployeeDepartment);
 			for(int employeeId:employeeIds) {
 				statement.setString(1,department);
 				statement.setInt(2, employeeId);
@@ -234,16 +238,28 @@ public class EmployeeDao {
 				connection.rollback();
 			}
 			catch(SQLException se) {
-				throw new EmployeeManagerException("Roll back failed!");
+				throw new EmployeeManagerException("Roll back failed: "+se.getMessage(),se);
 			}
-			throw new EmployeeManagerException("Error in sql operation ",e);
+			throw new EmployeeManagerException("Error in sql operation: "+e.getMessage(),e);
 		}
 		finally {
+			try {
+				statement.close();
+			}
+			catch (SQLException e) {
+	            throw new EmployeeManagerException("Failed to close prepared statement: "+e.getMessage(), e);
+	        }
 			try {
 				connection.setAutoCommit(true);
 			}
 			catch (SQLException e) {
-	            throw new EmployeeManagerException("Failed to reset auto-commit", e);
+	            throw new EmployeeManagerException("Failed to reset auto-commit: "+e.getMessage(), e);
+	        }
+			try {
+				connection.close();
+			}
+			catch (SQLException e) {
+	            throw new EmployeeManagerException("Failed to close connection: "+e.getMessage(), e);
 	        }
 		}
 	}
