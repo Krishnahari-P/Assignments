@@ -27,7 +27,7 @@ public class EmployeeDao {
 		logger.trace("Entering getConnection()");
 		
 	    Properties properties = new Properties();
-	    try (FileInputStream fis = new FileInputStream("src\\\\com\\\\litmus7\\\\resources\\\\db.properties")) {
+	    try (FileInputStream fis = new FileInputStream("src\\com\\litmus7\\resources\\db.properties")) {
 	        properties.load(fis);
 	    }
 	    catch (IOException e) {
