@@ -1,10 +1,10 @@
 package Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp;
 
-import com.litmus7.retailstoreapp.controller.ProductController;
-import com.litmus7.retailstoreapp.dto.Clothing;
-import com.litmus7.retailstoreapp.dto.Product;
-import com.litmus7.retailstoreapp.response.Response;
-import com.litmus7.retailstoreapp.util.Comparators;
+import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.controller.ProductController;
+import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.dto.Clothing;
+import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.dto.Product;
+import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.response.Response;
+import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.util.Comparators;
 
 public class RetailStoreApp {
 	public static void main(String[] args) {
