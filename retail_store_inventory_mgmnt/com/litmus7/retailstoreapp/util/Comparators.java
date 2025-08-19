@@ -8,4 +8,5 @@ public class Comparators {
 	public static Comparator<Product> priceAscending = (p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice());
     public static Comparator<Product> priceDescending = (p1, p2) -> Double.compare(p2.getPrice(), p1.getPrice());
     public static Comparator<Product> nameAscending = (p1, p2) -> p1.getProductName().compareToIgnoreCase(p2.getProductName());
+    public static Comparator<Product> nameDescending = (p1, p2) -> p2.getProductName().compareToIgnoreCase(p1.getProductName());
 }
