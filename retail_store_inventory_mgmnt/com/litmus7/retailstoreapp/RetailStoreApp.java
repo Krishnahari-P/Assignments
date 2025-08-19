@@ -4,7 +4,6 @@ import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.contr
 import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.dto.Clothing;
 import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.dto.Product;
 import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.response.Response;
-import Assignments.retail_store_inventory_mgmnt.com.litmus7.retailstoreapp.util.Comparators;
 
 public class RetailStoreApp {
 	public static void main(String[] args) {
@@ -14,7 +13,7 @@ public class RetailStoreApp {
 		viewAllProducts(productController);
 		viewProductsByCategory(productController,"Electronics");
 		sortProductsInAscending(productController);
-		sortProductsByNames(productController);
+		sortProductsByNamesInAscending(productController);
 	}
 	public static void addProduct(ProductController productController,Product product) {
 		Response response=productController.addProduct(product);
@@ -30,16 +29,21 @@ public class RetailStoreApp {
 //      Print the responses
 	}
 	public static void sortProductsInAscending(ProductController productController) {
-		Response response=productController.sortAndDisplayProducts(Comparators.priceAscending);
+		Response response=productController.sortProductsInAscending();
 //		print the responses
 	}
 	public static void sortProductsInDescending(ProductController productController) {
-		Response response=productController.sortAndDisplayProducts(Comparators.priceDescending);
+		Response response=productController.sortProductsInDescending();
 //		print the responses
 	}
 	
-	public static void sortProductsByNames(ProductController productController) {
-		Response response=productController.sortAndDisplayProducts(Comparators.nameAscending);
+	public static void sortProductsByNamesInAscending(ProductController productController) {
+		Response response=productController.sortProductsByNamesInAscending();
+//		print the responses
+	}
+	
+	public static void sortProductsByNamesInDescending(ProductController productController) {
+		Response response=productController.sortProductsByNamesInDescending();
 //		print the responses
 	}
 	
