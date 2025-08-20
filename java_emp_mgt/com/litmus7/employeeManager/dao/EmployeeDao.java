@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import com.litmus7.employeeManager.constants.SQLConstants;
 import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 import com.litmus7.employeeManager.model.Employee;
+import com.litmus7.employeeManager.util.DBConnection;
 
 
 public class EmployeeDao {	
