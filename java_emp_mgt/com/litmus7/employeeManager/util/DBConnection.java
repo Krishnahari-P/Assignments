@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.LogManager;
 
+import com.litmus7.employeeManager.constants.ErrorCode;
 import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 
 public class DBConnection {
@@ -20,7 +21,7 @@ public class DBConnection {
 	    }
 	    catch (IOException e) {
 	    	logger.error("Failed to load database properties", e);
-	        throw new EmployeeManagerException("Failed to load database properties: "+e.getMessage(), e);
+	        throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 	    }
 
 	    String URL = properties.getProperty("jdbc.url");
@@ -33,7 +34,7 @@ public class DBConnection {
 		} 
 	    catch(SQLException e) {
 	    	logger.error("Database connection failed",e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 	}
 
