@@ -12,6 +12,7 @@ import com.litmus7.employeeManager.validator.Validator;
 import com.litmus7.employeeManager.dao.EmployeeDao;
 import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 import com.litmus7.employeeManager.model.Employee;
+import com.litmus7.employeeManager.util.DBConnection;
 
 public class EmployeeService {
 	
@@ -27,7 +28,7 @@ public class EmployeeService {
         	return validEmployees;
         }
 
-        try (Connection connection = employeeDao.getConnection()) {
+        try (Connection connection = DBConnection.getConnection()) {
             connection.setAutoCommit(false);
 
             for (String[] record : employeeRecords) {
