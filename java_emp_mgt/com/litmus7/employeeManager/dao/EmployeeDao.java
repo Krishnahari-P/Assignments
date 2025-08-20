@@ -1,21 +1,17 @@
 package com.litmus7.employeeManager.dao;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.litmus7.employeeManager.constants.ErrorCode;
 import com.litmus7.employeeManager.constants.SQLConstants;
 import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 import com.litmus7.employeeManager.model.Employee;
@@ -23,8 +19,8 @@ import com.litmus7.employeeManager.util.DBConnection;
 
 
 public class EmployeeDao {	
-	private static final Logger logger=LogManager.getLogger(EmployeeDao.class);
-	    
+	private static final Logger logger=LogManager.getLogger(EmployeeDao.class);	    
+	
 	public boolean employeeExists(int employeeId) throws EmployeeManagerException {
 		logger.trace("Entering employeeExists(empId={})", employeeId);
 		String getEmployeeData=SQLConstants.checkEmployeeExists;
@@ -39,7 +35,7 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			logger.error("Error in checking if employee exists",e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR,e);
 		}
 		
 	}
@@ -70,7 +66,7 @@ public class EmployeeDao {
         }
         catch(SQLException e) {
         	logger.error("Error saving data to DB", e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+        	throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
     }
 	
@@ -89,7 +85,7 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			logger.error("Error fetching employee names", e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 		return employeeNames;
 	}
@@ -120,7 +116,7 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			logger.error("Error fetching employee details", e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 		logger.trace("Exiting fetchEmployeeById()");
 		return employeeDetails;
@@ -140,7 +136,7 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			logger.error("Error in deleting employee with ID {}", employeeId, e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 	}
 
@@ -165,7 +161,7 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			logger.error("Error adding employee with employeeId {}",employee.getEmployeeId(),e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 	}
 
@@ -190,7 +186,7 @@ public class EmployeeDao {
 		}
 		catch(SQLException e) {
 			logger.error("Error updating employee with employeeId {}",employee.getEmployeeId(),e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 	}
 
@@ -229,7 +225,7 @@ public class EmployeeDao {
         }
         catch(SQLException e) {
         	logger.error("Error in batch processing",e);
-			throw new EmployeeManagerException("Couldn't connect to db: "+e.getMessage(),e);
+        	throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 	}
 	
@@ -250,7 +246,7 @@ public class EmployeeDao {
 				if(updates==0) {
 					connection.rollback();
 					logger.warn("Rollback due to invalid employeeId {}", employeeId);
-					throw new EmployeeManagerException("Couldn't update due to invalid employee data for employeeId "+employeeId);
+					throw new EmployeeManagerException(ErrorCode.INVALID_EMPLOYEE);
 				}
 			}
 			logger.trace("Exiting transferEmployeesToDepartment()");
@@ -263,34 +259,26 @@ public class EmployeeDao {
 			}
 			catch(SQLException se) {
 				logger.debug("Roll back failed ",se);
-				throw new EmployeeManagerException("Roll back failed: "+se.getMessage(),se);
+				throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, se);
 			}
 			logger.error("SQL error while transferring employees to department '{}'", department, e);
-			throw new EmployeeManagerException("Error in sql operation: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		}
 		finally {
-			try {
-				statement.close();
-			}
-			catch (SQLException e) {
-				logger.debug("Failed to close prepared statement ",e);
-	            throw new EmployeeManagerException("Failed to close prepared statement: "+e.getMessage(), e);
-	        }
-			try {
-				connection.setAutoCommit(true);
-			}
-			catch (SQLException e) {
-				logger.debug("Failed to reset auto-commit ",e);
-	            throw new EmployeeManagerException("Failed to reset auto-commit: "+e.getMessage(), e);
-	        }
-			try {
-				connection.close();
-			}
-			catch (SQLException e) {
-				logger.debug("Failed to close connection",e);
-	            throw new EmployeeManagerException("Failed to close connection: "+e.getMessage(), e);
-	        }
-		}
+            try {
+                if (statement != null) {
+                	statement.close();
+                }
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                }
+            } 
+            catch (SQLException e) {
+                logger.debug("Cleanup failed", e);
+                throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
+            }
+        }
 	}
 	
 }
