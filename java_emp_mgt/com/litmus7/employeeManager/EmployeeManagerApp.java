@@ -38,9 +38,9 @@ class EmployeeManagerApp {
 	}
 	
 	public static void saveDataToDb(EmployeeManagerController employeeManagerController,String filePath) {
-		Response response = employeeManagerController.writeDataToDb(filePath);
-		if (response.getStatusCode()==200) {
-            System.out.println("Success: " + response.getMessage());
+		Response<Object> response = employeeManagerController.writeDataToDb(filePath);
+		if (response.getStatusCode()==206) {
+            System.out.println("Success: " +response.getStatusCode() +": "+response.getMessage());
         } 
 		else {
             System.out.println("Failure: "+response.getStatusCode() +": "+ response.getMessage());
@@ -48,76 +48,82 @@ class EmployeeManagerApp {
 	}
 	
 	public static void getEmployeeData(EmployeeManagerController employeeManagerController) {
-		Response response = employeeManagerController.getAllEmployeeNames();
-		if(response.getStatusCode()==200) {
+		Response<List<String>> response = employeeManagerController.getAllEmployeeNames();
+		if(response.getStatusCode()==201) {
 			System.out.println("Name of existing employees in the database :");
+			for (String name : response.getData()) {
+	            System.out.println(name);
+	        }
 			System.out.println(response.getMessage());
 		}
 		else {
-			System.out.println(response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode() +": "+ response.getMessage());
 		}
 	}
 	
 	public static void getEmployeesById(EmployeeManagerController employeeManagerController,List<Integer> employeeId) {
-		Response response = employeeManagerController.getEmployeesById(employeeId);
-		if(response.getStatusCode()==200) {
+		Response<List<String>> response = employeeManagerController.getEmployeesById(employeeId);
+		if(response.getStatusCode()==201) {
 			System.out.println("Details of valid employees: ");
+			for (String detail : response.getData()) {
+	            System.out.println(detail);
+	        }
 			System.out.println(response.getMessage());
 		}
 		else {
-			System.out.println(response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode() +": "+ response.getMessage());
 		}
 	}
 	
 	public static void deleteEmployeeById(EmployeeManagerController employeeManagerController,int employeeId) {
-		Response response = employeeManagerController.deleteEmployeeById(employeeId);
-		if(response.getStatusCode()==200) {
+		Response<Object> response = employeeManagerController.deleteEmployeeById(employeeId);
+		if(response.getStatusCode()==202) {
 			System.out.println("Success: "+response.getMessage());
 		}
 		else {
-			System.out.println("Failure: "+response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode()+": "+response.getMessage());
 		}
 	}
 	
 	public static void addEmployee(EmployeeManagerController employeeManagerController,Employee employee) {
-		Response response = employeeManagerController.addEmployee(employee);
+		Response<Object> response = employeeManagerController.addEmployee(employee);
 		if(response.getStatusCode()==200) {
 			System.out.println("Success: "+response.getMessage());
 		}
 		else {
-			System.out.println("Failure: "+response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode()+" "+response.getMessage());
 		}
 	}
 	
 	public static void updateEmployee(EmployeeManagerController employeeManagerController,Employee employee) {
-		Response response = employeeManagerController.updateEmployee(employee);
-		if(response.getStatusCode()==200) {
+		Response<Object> response = employeeManagerController.updateEmployee(employee);
+		if(response.getStatusCode()==203) {
 			System.out.println("Success: "+response.getMessage());
 		}
 		else {
-			System.out.println("Failure: "+response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode()+" "+response.getMessage());
 		}
 	}
 	
 	public static void  addEmployeesInBatch(EmployeeManagerController employeeManagerController,List<Employee> employeeList) {
-		Response response = employeeManagerController.addEmployeesInBatch(employeeList);
+		Response<Object> response = employeeManagerController.addEmployeesInBatch(employeeList);
 		if(response.getStatusCode()==200) {
 			System.out.println("Success: " + response.getMessage());
 		}
-		else if(response.getStatusCode()==202) {
+		else if(response.getStatusCode()==204) {
 			System.out.println("Partial Success: " + response.getMessage());
 		}
 		else {
-			System.out.println("Failure: "+response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode()+" "+response.getMessage());
 		}
 	}
 	public static void transferEmployeesToDepartment(EmployeeManagerController employeeManagerController,List<Integer> employeeIds, String newDepartment) {
-		Response response = employeeManagerController.transferEmployeesToDepartment(employeeIds,newDepartment);
-		if(response.getStatusCode()==200) {
+		Response<Object> response = employeeManagerController.transferEmployeesToDepartment(employeeIds,newDepartment);
+		if(response.getStatusCode()==205) {
 			System.out.println("Success: " + response.getMessage());
 		}
 		else {
-			System.out.println("Failure: "+response.getMessage());
+			System.out.println("Failure: "+response.getStatusCode()+" "+response.getMessage());
 		}
 	}
 }
