@@ -27,7 +27,7 @@ public class EmployeeDao {
 	public boolean employeeExists(int employeeId) throws EmployeeManagerException {
 		logger.trace("Entering employeeExists(empId={})", employeeId);
 		String getEmployeeData=SQLConstants.checkEmployeeExists;
-		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
+		try(Connection connection=DBConnection.getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
 			statement.setInt(1, employeeId);
 			logger.debug("Executing SQL query: {} with employeeId: {}",getEmployeeData,employeeId);
 			try(ResultSet rs=statement.executeQuery()){
@@ -46,7 +46,7 @@ public class EmployeeDao {
 	public void saveDataToDb(List<Employee> employeeList) throws EmployeeManagerException {
 		logger.trace("Entering saveDataToDb() with employeeList size = {}", employeeList.size());
         String insertEmployee = SQLConstants.insertEmployee;
-        try (Connection connection=getConnection();PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
+        try (Connection connection=DBConnection.getConnection();PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
         	int batchSize=0;
             for (Employee employee : employeeList) {
                 statement.setInt(1, employee.getEmployeeId());
@@ -77,7 +77,7 @@ public class EmployeeDao {
 		logger.trace("Entering fetchEmployeeNames()");
 		List<String> employeeNames=new ArrayList<>();
 		String getEmployeeData=SQLConstants.getEmployeeName;
-		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
+		try(Connection connection=DBConnection.getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeData)){
 			logger.debug("Executing SQL query: {}",getEmployeeData);
 			ResultSet resultSet=statement.executeQuery();
 			while(resultSet.next()) {
@@ -98,7 +98,7 @@ public class EmployeeDao {
 		logger.trace("Entering fetchEmployeeById() with employeeIdList of size {}",employeeIdList.size());
 		List<String> employeeDetails=new ArrayList<>();
 		String getEmployeeById=SQLConstants.getEmployeeById;
-		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeById)){
+		try(Connection connection=DBConnection.getConnection();PreparedStatement statement=connection.prepareStatement(getEmployeeById)){
 			for(int employeeId:employeeIdList) {
 				statement.setInt(1, employeeId);
 				logger.debug("Executing SQL query: {}",getEmployeeById);
@@ -129,7 +129,7 @@ public class EmployeeDao {
 	public boolean deleteEmployeeById(int employeeId) throws EmployeeManagerException {
 		logger.trace("Entering deleteEmployeeById with employeeId={}", employeeId);
 		String deleteEmployeeById=SQLConstants.deleteEmployeeById;
-		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(deleteEmployeeById)){
+		try(Connection connection=DBConnection.getConnection();PreparedStatement statement=connection.prepareStatement(deleteEmployeeById)){
 			statement.setInt(1, employeeId);
 			logger.debug("Executing SQL query {}",deleteEmployeeById);
 			int rowsAffected = statement.executeUpdate();
@@ -147,7 +147,7 @@ public class EmployeeDao {
 	public boolean addEmployee(Employee employee) throws EmployeeManagerException {
 		logger.trace("Entering addEmployee() with employeeId = {}",employee.getEmployeeId());
 		String insertEmployee=SQLConstants.insertEmployee;
-		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(insertEmployee)){
+		try(Connection connection=DBConnection.getConnection();PreparedStatement statement=connection.prepareStatement(insertEmployee)){
 			statement.setInt(1, employee.getEmployeeId());
             statement.setString(2, employee.getFirstName());
             statement.setString(3, employee.getLastName());
@@ -172,7 +172,7 @@ public class EmployeeDao {
 	public boolean updateEmployee(Employee employee) throws EmployeeManagerException {
 		logger.trace("Entering updateEmployee() with employeeId {}",employee.getEmployeeId());
 		String updateEmployee=SQLConstants.updateEmployee;
-		try(Connection connection=getConnection();PreparedStatement statement=connection.prepareStatement(updateEmployee)){
+		try(Connection connection=DBConnection.getConnection();PreparedStatement statement=connection.prepareStatement(updateEmployee)){
             statement.setString(1, employee.getFirstName());
             statement.setString(2, employee.getLastName());
             statement.setString(3, employee.getEmail());
@@ -198,7 +198,7 @@ public class EmployeeDao {
 		logger.trace("Entering addEmployeesInBatch() with employeeList of size {}",employeeList.size());
 		String insertEmployee = SQLConstants.insertEmployee;
 		int employeesInserted=0;
-		try (Connection connection=getConnection();PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
+		try (Connection connection=DBConnection.getConnection();PreparedStatement statement = connection.prepareStatement(insertEmployee)) {
             for (Employee employee : employeeList) {
                 statement.setInt(1, employee.getEmployeeId());
                 statement.setString(2, employee.getFirstName());
@@ -238,7 +238,7 @@ public class EmployeeDao {
 		Connection connection=null;
 		PreparedStatement statement=null;
 		try{
-			connection=getConnection();
+			connection=DBConnection.getConnection();
 			connection.setAutoCommit(false);
 			statement=connection.prepareStatement(updateEmployeeDepartment);
 			for(int employeeId:employeeIds) {
