@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.litmus7.employeeManager.constants.ErrorCode;
 import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 
 public class CSVUtil {
@@ -19,7 +20,7 @@ public class CSVUtil {
             }
         } 
         catch (IOException e) {
-        	throw new EmployeeManagerException("File not found");
+        	throw new EmployeeManagerException(ErrorCode.CSV_READING_ERROR);
 		} 
         return records;
     }
