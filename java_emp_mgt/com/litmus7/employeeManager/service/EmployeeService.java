@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.litmus7.employeeManager.validator.Validator;
+import com.litmus7.employeeManager.constants.ErrorCode;
 import com.litmus7.employeeManager.dao.EmployeeDao;
 import com.litmus7.employeeManager.exceptions.EmployeeManagerException;
 import com.litmus7.employeeManager.model.Employee;
@@ -58,7 +59,7 @@ public class EmployeeService {
         } 
         catch (SQLException e) {
         	logger.error("Database connection or commit failed", e);
-			throw new EmployeeManagerException("Database connection or commit failed: "+e.getMessage(),e);
+        	throw new EmployeeManagerException(ErrorCode.DATABASE_ERROR, e);
 		} 
         logger.trace("Exiting processCSVAndSaveData()");
 
@@ -97,9 +98,12 @@ public class EmployeeService {
         	logger.info("Fetching completed");
             return employeeNames;
         }
-        catch( Exception e) {
+        catch(EmployeeManagerException e) {
+        	throw e;
+        }
+        catch(Exception e) {
         	logger.error("Fetching employee names failed", e);
-        	throw new EmployeeManagerException("Fetching employee names failed: "+e.getMessage(),e);
+        	throw new EmployeeManagerException(ErrorCode.FETCH_ERROR, e);
         }
     }
 
@@ -118,16 +122,19 @@ public class EmployeeService {
 
             if (validEmployeeIds.isEmpty()) {
             	logger.warn("No valid employee IDs found in input list");
-                throw new EmployeeManagerException("No valid employee ID's found.");
+            	throw new EmployeeManagerException(ErrorCode.EMPLOYEE_NOT_FOUND);
             }
 
             List<String> employees = employeeDao.fetchEmployeesById(validEmployeeIds);
             logger.info("Retrieved {} employee records", employees.size());
             return employees;
         }
+        catch(EmployeeManagerException e) {
+        	throw e;
+        }
         catch (Exception e) {
         	logger.error("Fetching employee details failed", e);
-            throw new EmployeeManagerException("Fetching employee details failed:",e);
+        	throw new EmployeeManagerException(ErrorCode.FETCH_ERROR, e);
         }
     }
 
@@ -137,7 +144,7 @@ public class EmployeeService {
 		try{
 			if (!employeeDao.employeeExists(employeeId)) {
 				logger.warn("Employee ID {} does not exist", employeeId);
-                throw new EmployeeManagerException("Employee doesn't exists for the given ID "+employeeId);
+				throw new EmployeeManagerException(ErrorCode.EMPLOYEE_NOT_FOUND);
             }
 			 boolean employeeDeleted = employeeDao.deleteEmployeeById(employeeId);
 			 if (employeeDeleted) {
@@ -148,9 +155,12 @@ public class EmployeeService {
 		     }
 			 return employeeDeleted;
 		}
+		catch(EmployeeManagerException e) {
+			throw e;
+		}
 		catch(Exception e) {
 			logger.error("Deletion failed for employee ID {}", employeeId, e);
-			throw new EmployeeManagerException("Deletion falied: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.DELETE_ERROR, e);
 		}
 	}
 
@@ -159,11 +169,11 @@ public class EmployeeService {
 		try{
 			if (employeeDao.employeeExists(employee.getEmployeeId())) {
 				logger.warn("Employee already exists with ID {}",employee.getEmployeeId());
-				throw new EmployeeManagerException("Employee already exists with given employee Id");
+				throw new EmployeeManagerException(ErrorCode.EMPLOYEE_ALREADY_EXISTS);
             }
 			if (employee == null || !Validator.isValidEmployee(employee)) {
 				logger.warn("Invalid employee with ID {}",employee.getEmployeeId());
-            	throw new EmployeeManagerException("Invalid employee details");
+				throw new EmployeeManagerException(ErrorCode.INVALID_EMPLOYEE);
             }
 			boolean employeeAdded = employeeDao.addEmployee(employee);
 			if(employeeAdded) {
@@ -174,9 +184,12 @@ public class EmployeeService {
 			}
 			return employeeAdded;
 		}
+		catch(EmployeeManagerException e) {
+			throw e;
+		}
 		catch(Exception e) {
 			logger.error("Addition failed for employee ID {}", employee.getEmployeeId(), e);
-			throw new EmployeeManagerException("Employee addition failed: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.ADD_ERROR, e);
 		}
 		
 	}
@@ -186,11 +199,11 @@ public class EmployeeService {
 		try{
 			if (employee == null || !Validator.isValidEmployee(employee)) {
 				logger.warn("Invalid employee details with ID {}",employee.getEmployeeId());
-            	throw new EmployeeManagerException("Invalid employee details");
-            }
+				throw new EmployeeManagerException(ErrorCode.INVALID_EMPLOYEE);
+			}
 			if(!employeeDao.employeeExists(employee.getEmployeeId())) {
 				logger.warn("Employee doesn't exists for the ID {}",employee.getEmployeeId());
-				throw new EmployeeManagerException("Employee doesn't exists for the given ID "+employee.getEmployeeId());
+				throw new EmployeeManagerException(ErrorCode.EMPLOYEE_NOT_FOUND);
 			}
 			boolean employeeUpdated = employeeDao.updateEmployee(employee);
 			if(employeeUpdated) {
@@ -202,9 +215,12 @@ public class EmployeeService {
 			
 			return employeeUpdated;
 		}
+		catch(EmployeeManagerException e) {
+			throw e;
+		}
 		catch(Exception e) {
 			logger.error("Updation failed for employee ID {}", employee.getEmployeeId(), e);
-			throw new EmployeeManagerException("Update employee failed: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.UPDATE_ERROR, e);
 		}
 	}
 
@@ -227,9 +243,12 @@ public class EmployeeService {
 			logger.info("Batch insert complete: {} succeeded, {} failed", employeesInserted, employeeList.size()-employeesInserted);
 			return employeesInserted;
 		}
+		catch(EmployeeManagerException e) {
+			throw e;
+		}
 		catch(Exception e) {
 			logger.error("Batch addition failed:",e);
-			throw new EmployeeManagerException("Batch addition failed: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.BATCH_INSERT_ERROR, e);
 		}
 	}
 	
@@ -237,16 +256,19 @@ public class EmployeeService {
 		logger.trace("Attempting transferEmployeesToDepartment()");
         if (employeeIds.isEmpty() || newDepartment == null) {
         	logger.warn("Employee IDs or Department name is invalid.");
-            throw new EmployeeManagerException("Employee IDs or Department name is invalid.");
+        	throw new EmployeeManagerException(ErrorCode.INVALID_EMPLOYEE);
         }
         try{
 			boolean employeesTransfered = employeeDao.transferEmployeesToDepartment(employeeIds, newDepartment);
 			logger.info("Successfully transferred {} employees to department {}", employeeIds.size(), newDepartment);
 			return employeesTransfered;
 		}
+        catch(EmployeeManagerException e) {
+        	throw e;
+        }
 		catch(Exception e) {
 			logger.error("Employee transfer failed for {} employees to department {}" ,employeeIds.size(), newDepartment,e);
-			throw new EmployeeManagerException("Employee transfer failed: "+e.getMessage(),e);
+			throw new EmployeeManagerException(ErrorCode.TRANSFER_ERROR, e);
 		}
         
     }
